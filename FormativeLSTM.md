@@ -25,7 +25,6 @@ Conventional backpropagation changes the weights for each node in a the network 
 
 
 
-
 --- 
 
 ### A Post Script for things I'd like to learn eventually
