@@ -31,90 +31,98 @@ As such, the experiments used in this paper in general involve long minimal time
 
 There is a line in this section "Net activations are reset after each processed input sequence," and I'm not entirely certain what that means.
 
-Networks are compared in 6 'experiments' in which they predict next characters given the sequence so far and the shape of sequences in the training data.
+Networks are compared in 6 'experiments' in which they predict next characters given the sequence so far and the shape of sequences in the training data. LSTM's performed consistently in all experiements, learning even the most difficult versions of every task. (As of 1997, no other networks had succeeded at tasks 4-6). Architectures never used more than 6 memory cells organized into 1-4 blocks (see table 10 p21), and many tasks may be learnable on smaller architectures, given long training times. The discussion section (6) lists some situations in which LSTMs do not perform well (eg. on smaller sequences), but in general the model learns long distance relationships in sequences of substantial length better than any of its predecessors. The experiments themselves are summarized below.
+
 
 - 1 Embedded Reber Grammar: 
-    - alphabet: {B,P,T,S,X,V}
-    - sequence shape: " B 1 B [regular language] E 1 E " where '1' is either 'T' or 'P'
-    - goal: for every time step, correctly identify all symbols which would be gramattical in the next time step.
-    - challenge: the machine must remember the second symbols over the entire length of the string in addtion to remembering the rest of the regular language. (Both T and P can also occur in the embedded language. See pg 11 figures 3 and 4 for the complete diagram)
+    - _alphabet_: {B,P,T,S,X,V}
+    - _sequence_: " B 1 B [regular language] E 1 E " where '1' is either 'T' or 'P'
+    - _goal_: for every time step, correctly identify all symbols which would be gramattical in the next time step.
+    - _challenge_: the machine must remember the second symbols over the entire length of the string in addtion to remembering the rest of the regular language. (Both T and P can also occur in the embedded language. See pg 11 figures 3 and 4 for the complete diagram)
 
-- 2 Remembering first char  
+- 2 Remembering first character
     - a) *noise free* (50% accuracy or less for RNNs and non LSTM, 97% or better for LSTM) 
-        - alphabet: {a_1 ... a_p-1, x, y} 
-        - sequence shape: "1, a_1 ... a_(p-1), 1 " where 1 is either 'x' or 'y' 
-        - predict: next symbol
-        - challenge: learn alaphabet order and remember first symbol for length of input
+        - _alphabet_: {a<sub>1</sub> ... a<sub>p-1</sub>, x, y} 
+        - _sequence_: "1, a<sub>1</sub> ... a<sub>p-1</sub>, 1 " where 1 is either 'x' or 'y' 
+        - _goal_: predict next symbol
+        - _challenge_: learn alaphabet order and remember first symbol for length of input
 
-    - b without internal regularity (only LSTM and Chunking learn when |alphabet| > 100, CHunker 33% accuracy)
-        - alphabet: {a_1 ... a_p-1, x, y} let R be a randomly selected symbol from a_1- a_p-1 
-        - sequence shape: "1, R_1 ... R_p-1, 1 " where 1 is either 'x' or 'y' 
-        - goal: predict next symbol, with absolute error < .25 over entire sequence
-        - challenge: only fist and last symbols are non-random, remember first symbol for length of input, without compression offered by 2a
+    - b) *without internal regularity* (only LSTM and Chunking learn when |alphabet| > 100, Chunker 33% accuracy, LSTM 100%)
+        - _alphabet_: {a<sub>1</sub> ... a<sub>p-1</sub>, x, y} let R be a randomly selected symbol from a<sub>1</sub>- a<sub>p-1</sub> 
+        - _sequence_ : "1, R<sub>1</sub> ... R<sub>p-1</sub>, 1 " where 1 is either 'x' or 'y' 
+        - _goal_: predict next symbol, with absolute error < .25 over entire sequence
+        - _challenge_: only fist and last symbols are non-random, remember first symbol for length of input, without compression offered by 2a
 
-    - c long time lag w/o regularity (only solved by LSTM)
-        - alphabet: {a_1 ... a_p, e, b, x, y}, a_1 ... a_p are called distractor symbols, b=beginning, e= end. let R be a randomly selected distractor symbol
-        - sequence shape: " b, 1, R_1 ... R_(q+k), e, 1 " where 1 is either 'x' or 'y' and R is selected from a subset of the first q distractor symbols. The first q+2 symbols are randomly selected from that subset and every symbol has a 10% chance of being the 'e' symbol. When an 'e' occurs, the next symbol is the same as the second symbol in the sequence and the sequence ends. 
-        - goal: predict last symbol
-        - challenge: only very long lag examples are included in training. The expected length of the sequence is q+14. (p14) 
-- 3 Noisy Signal
+    - c) *long time lag w/o regularity* (only solved by LSTM)
+        - _alphabet_: {a<sub>1</sub> ... a<sub>p</sub>, e, b, x, y}, a<sub>1</sub> ... a<sub>p</sub> are called distractor symbols, b=beginning, e= end. let R be a randomly selected distractor symbol
+        - _sequence_: " b, 1, R<sub>1</sub> ... R<sub>q+k</sub>, e, 1 " where 1 is either 'x' or 'y' and R is selected from a subset of the first q distractor symbols. The first q+2 symbols are randomly selected from that subset and every symbol has a 10% chance of being the 'e' symbol. When an 'e' occurs, the next symbol is the same as the second symbol in the sequence and the sequence ends. 
+        - _goal_: predict last symbol
+        - _challenge_: only very long lag examples are included in training. The expected length of the sequence is q+14. (p14) 
+- 3 Noisy signal
     a) (can be learned by random weight guessing faster than LSTM or any other network)
-        - alphabet: reals from gaussian with mean 0 and var .2, 1, -1
-        - sequence: approximately (see paper for details) two 1's followed by ~T reals or two -1's followed by ~T reals
-        - goal: classify sequence 1 if first digits are 1, and 0 if they are -1. 
+        - _alphabet_: reals from gaussian with mean 0 and var .2, 1, -1
+        - _sequence_: approximately (see paper for details) two 1's followed by ~T reals or two -1's followed by ~T reals
+        - _goal_: classify sequence 1 if first digits are 1, and 0 if they are -1. 
     b) 
-        - alphabet: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
-        - sequence: same as 3a with noisy signals
-        - goal: classify sequence 1 if first digits are ~1, and 0 if they are ~-1. 
+        - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
+        - _sequence_: same as 3a with noisy signals
+        - _goal_: classify sequence 1 if first digits are ~1, and 0 if they are ~-1. 
     c) 
-        - alphabet: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
-        - sequence: same as 3a with noisy signals
-        - goal: output .2 if first digits are ~1, and .8 if they are ~-1. 
-        - challenge: training targets are also altered by addition of gaussian noise
+        - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
+        - _sequence_: same as 3a with noisy signals
+        - _goal_: output .2 if first digits are ~1, and .8 if they are ~-1. 
+        - _challenge_: training targets are also altered by addition of gaussian noise
     
 
 - 4 Adding Problem
-    - alphabet: (x,y) where x is a random real form [-1,1] and y -1 for first and last chars, 1 for marked chars, and 0 elsewise
-    - sequence: (a_1, -1), (a_2, 0),  ..., (X_1, 1) ... (X_2, 1) ... (a_N-1, 0), (a_N, -1) where N is between T and T+(T/10), X_1 is randomly positioned amoung the first 10 elements, and X_2 is randomly positioned among the first T/2 elements. (T is 100, 500, or 1000)
-    - goal: calculate .5 * (X_1 + X_2)/4 (sum of  X's scaled to 0,1)
-    - challenge: remember sum of two continuous values over a long interval
+    - _alphabet_: (x,y) where x is a random real form [-1,1] and y -1 for first and last chars, 1 for marked chars, and 0 elsewise
+    - _sequence_: (a<sub>1</sub>, -1), (a<sub>2</sub>, 0),  ..., (X<sub>1</sub>, 1) ... (X<sub>2</sub>, 1) ... (a<sub>N-1</sub>, 0), (a<sub>N</sub>, -1) where N is between T and T+(T/10), X<sub>1</sub> is randomly positioned amoung the first 10 elements, and X<sub>2</sub> is randomly positioned among the first T/2 elements. (T is 100, 500, or 1000)
+    - _goal_: calculate .5 * (X<sub>1</sub> + X<sub>2</sub>)/4 (sum of  X's scaled to 0,1)
+    - _challenge_: remember sum of two continuous values over a long interval
 
 - 5 Multiplication Problem
-    - alphabet: (x,y) where x is a random real form [0,1] and y -1 for first and last chars, 1 for marked chars, and 0 elsewise
-    - sequence: (a_1, -1), (a_2, 0),  ..., (X_1, 1) ... (X_2, 1) ... (a_N-1, 0), (a_N, -1) where N is between T and T+(T/10), X_1 is randomly positioned amoung the first 10 elements, and X_2 is randomly positioned among the first T/2 elements. (T = 100)
-    - goal: calculate X_1 * X_2
-    - challenge: remember product of two continuous values over a long interval. (see p18 for why this is harder than addition)
+    - _alphabet_: (x,y) where x is a random real form [0,1] and y -1 for first and last chars, 1 for marked chars, and 0 elsewise
+    - _sequence_: (a<sub>1</sub>, -1), (a<sub>2</sub>, 0),  ..., (X<sub>1</sub>, 1) ... (X<sub>2</sub>, 1) ... (a<sub>N-1</sub>, 0), (a<sub>N</sub>, -1) where N is between T and T+(T/10), X<sub>1</sub> is randomly positioned amoung the first 10 elements, and X<sub>2</sub> is randomly positioned among the first T/2 elements. (T = 100)
+    - _goal_: calculate X<sub>1</sub> * X<sub>2</sub>
+    - _challenge_: remember product of two continuous values over a long interval. (see p18 for why this is harder than addition)
 
 - 6 Temporal Order
     - a Two symbols 
-        - alphabet: E, B, a, b , c, d, X, Y 
-        - sequence: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
-        - goal: produce output dependent on observed permutation of X and Y. XX-> Q, XY -> R, YX -> S, YY-> U
+        - _alphabet_: E, B, a, b , c, d, X, Y 
+        - _sequence_: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
+        - _goal_: produce output dependent on observed permutation of X and Y. XX-> Q, XY -> R, YX -> S, YY-> U
     - b Three symbols 
-        - alphabet: E, B, a, b , c, d, X, Y 
-        - sequence: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
-        - goal: produce output dependent on observed permutation of X's and Y's. XXX-> Q, XXY -> R, XYX -> S...
-
-### Summary
-
-LSTM's performed consistently in all experiements, learning even the most difficult versions of every task. (As of 1997, no other networks had succeeded at tasks 4-6). Architectures never used more than 6 memory cells organized into 1-4 blocks (see table 10 p21), and many tasks may be learnable on smaller architectures, given long training times. The discussion section (6) lists some situations in which LSTMs do not perform well (eg. on smaller sequences), but in general the model learns long distance relationships in sequences of substantial length better than any of its predecessors. 
+        - _alphabet_: E, B, a, b , c, d, X, Y 
+        - _sequence_: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
+        - _goal_: produce output dependent on observed permutation of X's and Y's. XXX-> Q, XXY -> R, XYX -> S...
 
 
+## 2001 and LSTMs on Context Free/Sensitive Grammars
+
+This paper reviews the basics of LSTM architecture and adds to it a few inovations, specifically forget gates and peephole connections. Roughly, forget gates allow the machine to reset the LSTM's long distance memory when information becomes out of date, and peephole connections allow gates to access that memory before the output of gates is combined with the cell state to calculate cell output. Using this architecture, the authors empirically show that LSTMs can learn structures as complex as context sensitive grammars in terms of the Chomsky lanugae heirarchy. 
+
+### Experiments
+
+In each of three experiements, LSTMS are fed sequences one symbol at a time and required to predict all possible characters in at the next timestep. The three languages are:
+
+- a<sup>n</sup> b<sup>n</sup>
+    - trained on n's between 1 and N and tested on n between 1 and M where M is larger than N but less than 1000. 
+- a<sup>n</sup> b<sup>m</sup>B<sup>m</sup> A<sup>n</sup>
+    - trained on 
+        - n and m from 1 to 11 constrained such that n+m less than 12 
+        - n and m from 1 to 11 (unconstrained)
+    - tested on n and m from 1 to 50
+- a<sup>n</sup> b<sup>n</sup>c<sup>n</sup>
+    - trained on 
+        - n between 1 and 500 
+        - n between N-1 and N  (N is between 1 and 500, but within a training set, all lengths are similar) 
+    - tested on n and m from 1 to 500
+
+Each sequence also starts with 'S' and ends with 'T'. So for the context sensitive language, given 'S', the correct prediction is 'a/T', after which inputs will be 'a' and outputs should be 'a/b' until a 'b' is seen, after which point the network should accurately predict the exact number of 'b's and 'c's needed to finish the sequence before outputing 'T'. 
 
 
+### Results
 
-
-
-
-
-
-
-
---- 
-
-### A Post Script for things I'd like to learn eventually
-- How does attention's attempted replacement of RNN's relate to LSTMs?
-- Do word embeddings learn TAM and PHI Features (no it's not related, but I still want to remember it)
-
+LSTMs were able to learn each of the langauges, though results vary in terms of the necessary amount of training and the size of the test strings to which the network generalized well. The remainder of the paper is worth exploring for analysis of how the network learned succeed at each of these tasks. 
 
 
