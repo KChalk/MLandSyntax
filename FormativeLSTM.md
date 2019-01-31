@@ -59,20 +59,19 @@ Networks are compared in 6 'experiments' in which they predict next characters g
         - _goal_: predict last symbol
         - _challenge_: only very long lag examples are included in training. The expected length of the sequence is q+14. (p14) 
 - 3 Noisy signal
-    a) (can be learned by random weight guessing faster than LSTM or any other network)
+    - a) (can be learned by random weight guessing faster than LSTM or any other network)
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1, -1
         - _sequence_: approximately (see paper for details) two 1's followed by ~T reals or two -1's followed by ~T reals
         - _goal_: classify sequence 1 if first digits are 1, and 0 if they are -1. 
-    b) 
+    - b) 
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
         - _sequence_: same as 3a with noisy signals
         - _goal_: classify sequence 1 if first digits are ~1, and 0 if they are ~-1. 
-    c) 
+    - c) 
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
         - _sequence_: same as 3a with noisy signals
         - _goal_: output .2 if first digits are ~1, and .8 if they are ~-1. 
-        - _challenge_: training targets are also altered by addition of gaussian noise
-    
+        - _challenge_: training targets are also altered by addition of gaussian noise    
 
 - 4 Adding Problem
     - _alphabet_: (x,y) where x is a random real form [-1,1] and y -1 for first and last chars, 1 for marked chars, and 0 elsewise
