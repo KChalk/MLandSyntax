@@ -59,15 +59,15 @@ Networks are compared in 6 'experiments' in which they predict next characters g
         - _goal_: predict last symbol
         - _challenge_: only very long lag examples are included in training. The expected length of the sequence is q+14. (p14) 
 - 3 Noisy signal
-    a) (can be learned by random weight guessing faster than LSTM or any other network)
+    - a) (can be learned by random weight guessing faster than LSTM or any other network)
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1, -1
         - _sequence_: approximately (see paper for details) two 1's followed by ~T reals or two -1's followed by ~T reals
         - _goal_: classify sequence 1 if first digits are 1, and 0 if they are -1. 
-    b) 
+    - b) 
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
         - _sequence_: same as 3a with noisy signals
         - _goal_: classify sequence 1 if first digits are ~1, and 0 if they are ~-1. 
-    c) 
+    - c) 
         - _alphabet_: reals from gaussian with mean 0 and var .2, 1 +gaussian noise with mean 0 and standard dev .1, -1 +gaussian noise with mean 0 and standard dev .1
         - _sequence_: same as 3a with noisy signals
         - _goal_: output .2 if first digits are ~1, and .8 if they are ~-1. 
@@ -87,11 +87,11 @@ Networks are compared in 6 'experiments' in which they predict next characters g
     - _challenge_: remember product of two continuous values over a long interval. (see p18 for why this is harder than addition)
 
 - 6 Temporal Order
-    - a Two symbols 
+    - a) Two symbols 
         - _alphabet_: E, B, a, b , c, d, X, Y 
         - _sequence_: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
         - _goal_: produce output dependent on observed permutation of X and Y. XX-> Q, XY -> R, YX -> S, YY-> U
-    - b Three symbols 
+    - b) Three symbols 
         - _alphabet_: E, B, a, b , c, d, X, Y 
         - _sequence_: B, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, X or Y, [abcd]\*, E
         - _goal_: produce output dependent on observed permutation of X's and Y's. XXX-> Q, XXY -> R, XYX -> S...
